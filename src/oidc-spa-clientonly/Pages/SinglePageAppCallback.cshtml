@@ -1,0 +1,26 @@
+﻿@page
+@{
+    ViewData["Title"] = "SinglePageAppCallback";
+}
+<script src="~/lib/oidc-client/oidc-client.min.js"></script>
+
+<h1>Single Page App Callback</h1>
+
+<p>Processing the call back...</p>
+
+<p id="callbackErr"></p>
+
+@section scripts {
+    <script type="text/javascript">
+    $(document).ready(function () {
+        new Oidc.UserManager({
+            response_mode: "query"
+        }).signinRedirectCallback().then(function (user) {
+            window.location.href = "/Index";
+        }).catch(function (e) {
+            $("#callbackErr").html("There was a problem :-( - Message = " + e);
+        });
+
+    });
+    </script>
+}

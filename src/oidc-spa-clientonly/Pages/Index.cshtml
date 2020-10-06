@@ -1,0 +1,86 @@
+﻿@page
+@model IndexModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = "Home page";
+}
+<script src="~/lib/oidc-client/oidc-client.min.js"></script>
+
+<h1>Single Page App</h1>
+
+@* Bootstrap section with buttons to run demo and display results *@
+<div class="container">
+    <div class="row">
+        <button class="btn col-3 btn-success m-3" id="btnLogin">Login</button>
+        <button class="btn col-3 btn-warning m-3" id="btnAPI">Call My API</button>
+        <button class="btn col-3 btn-danger m-3" id="btnLogout">Logout</button>
+    </div>
+    <div class="row">
+        <div class="col-2">Logged in Status:</div>
+        <div class="col-3" id="txtLoginStatus">-</div>
+        <div class="col-3">Access Token Expires:</div>
+        <div class="col-4" id="txtLoginExpires">-</div>
+    </div>
+    <div class="row">
+        <div class="col-2">User:</div>
+        <div class="col-10" id="txtLoginUsr">-</div>
+    </div>
+    <div class="row">
+        <div class="col-2">JSON From API:</div>
+        <div class="col-2" id="txtAPIStatus">-</div>
+        <div class="col-8" id="txtAPIValue">-</div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var config = {
+                authority: "https://login.microsoftonline.com/@Configuration["AzureAD:TenantId"]/v2.0",
+                client_id: "@Configuration["AzureAD:ClientId"]",
+                redirect_uri: "@string.Format("{0}://{1}/SinglePageAppCallback", Request.Scheme, Request.Host)",
+                response_type: "code",
+                scope: "openid Notes.Read.All"
+            };
+
+            var umgr = new Oidc.UserManager(config);
+
+            $("#btnLogin").click(function () {
+                umgr.signinRedirect();
+            });
+            $("#btnLogout").click(function () {
+                umgr.signoutRedirect();
+            });
+
+            umgr.getUser().then(function (user) {
+                if (user) {
+                    $("#txtLoginStatus").html("Logged In");
+                    $("#txtLoginUsr").html(user.profile.given_name);
+                    var dtime = new Date(user.expires_at * 1000).toLocaleDateString() + " " + new Date(user.expires_at * 1000).toLocaleTimeString();
+                    $("#txtLoginExpires").html(dtime);
+                }
+                else {
+                    $("#txtLoginStatus").html("Logged Out");
+                }
+            });
+
+            $("#btnAPI").click(function () {
+                umgr.getUser().then(function (user) {
+                    var accessToken = "NotSet";
+                    if (user) {
+                        accessToken = user.access_token;
+                    }
+                    $.getJSON({
+                        url: "https://graph.microsoft.com/v1.0/me/onenote/notebooks",
+                        headers: { "Authorization": "Bearer " + accessToken }
+                    }).always(function (data, textStatus) {
+                        $("#txtAPIStatus").html(data.status);
+                        $("#txtAPIValue").html(data.responseText);
+                    });
+                });
+            });
+
+        });
+    </script>
+}
