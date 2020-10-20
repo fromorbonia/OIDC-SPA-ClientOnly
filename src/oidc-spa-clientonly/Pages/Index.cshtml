@@ -41,7 +41,9 @@
                 client_id: "@Configuration["AzureAD:ClientId"]",
                 redirect_uri: "@string.Format("{0}://{1}/SinglePageAppCallback", Request.Scheme, Request.Host)",
                 response_type: "code",
-                scope: "openid Notes.Read.All"
+                scope: "openid Notes.Read.All",
+                automaticSilentRenew: true,
+                silent_redirect_uri:"@string.Format("{0}://{1}/SinglePageAppSilent", Request.Scheme, Request.Host)"
             };
 
             var umgr = new Oidc.UserManager(config);

@@ -1,0 +1,24 @@
+﻿@page
+@{
+    Layout = null;
+}
+<script src="~/lib/oidc-client/oidc-client.min.js"></script>
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>SinglePageAppSilent</title>
+    <p id="callbackErr"></p>
+</head>
+<body>
+<script>
+    new Oidc.UserManager()
+        .signinSilentCallback()
+            .catch(function (e) {
+            $("#callbackErr").html("There was trying a slient refresh:-( - Message = " + e);
+    });
+</script>
+</body>
+</html>
