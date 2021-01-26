@@ -17,7 +17,7 @@
     new Oidc.UserManager()
         .signinSilentCallback()
             .catch(function (e) {
-            $("#callbackErr").html("There was trying a slient refresh:-( - Message = " + e);
+            $("#callbackErr").html("There was an error trying a slient refresh:-( - Message = " + e);
     });
 </script>
 </body>
